@@ -103,7 +103,7 @@ sid = 0
 sol="euler"
 n_steps=2
 
-output_dir = 'output'
+output_dir = "output"
 os.makedirs(output_dir, exist_ok=True)
 
 

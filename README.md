@@ -4,7 +4,7 @@ Unofficial implementation of _**["SFM-TTS: Lightweight and Rapid Speech Synthesi
 
 ![Alt text](resources/fig1.png)
 
-Due to lack of details, the number of parameters is slightly larger than the one proposed in the paper.
+Due to lack of details, the number of parameters is slightly larger than the one proposed in the paper. 
 
 ## Pre-requisites
 1. Python >= 3.11
