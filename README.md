@@ -6,7 +6,7 @@ Unofficial implementation of _**["SFM-TTS: Lightweight and Rapid Speech Synthesi
 
 Due to lack of details, the number of parameters is slightly larger than the one proposed in the paper.
 
-## Pre-Requisites
+## Pre-requisites
 1. Python >= 3.11
 2. CUDA
 3. [Pytorch](https://pytorch.org/get-started/previous-versions/#v251) version 2.5.1 (+cu118) or higher
@@ -23,7 +23,7 @@ Due to lack of details, the number of parameters is slightly larger than the one
 
 6. [Download Hifi-GAN checkpoint](https://drive.google.com/drive/folders/1-eEYTB5Av9jNql0WGBlRoi-WH2J7bp5Y)
    
-   - The demo configurations of this repo use `UNIVERSAL_V1` and define its path as `"vocoder_path": "UNIVERSAL_V1/g_02500000"` from project root.
+   - The demo configurations of this repo use `UNIVERSAL_V1` and define its path as `"vocoder_path": "UNIVERSAL_V1/g_02500000"` from project root.(included)
    
 
 7. Prepare datasets & configuration
