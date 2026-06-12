@@ -82,7 +82,8 @@ class TextEncoder(nn.Module):
             self.prenet = lambda x, x_mask: x
 
         self.encoder = attentions.Encoder(
-            hidden_channels + (gin_channels if n_spks > 1 else 0),
+            #hidden_channels + (gin_channels if n_spks > 1 else 0),
+            hidden_channels,
             filter_channels,
             n_heads,
             n_layers,
@@ -92,7 +93,8 @@ class TextEncoder(nn.Module):
         )
 
         self.n_feats = out_channels #80
-        self.proj = nn.Conv1d(hidden_channels + (gin_channels if n_spks > 1 else 0), self.n_feats, 1)
+        #self.proj = nn.Conv1d(hidden_channels + (gin_channels if n_spks > 1 else 0), self.n_feats, 1)
+        self.proj = nn.Conv1d(hidden_channels, self.n_feats, 1)
 
     def forward(self, x, x_lengths, g=None):
         x = self.emb(x) * math.sqrt(self.hidden_channels)
@@ -100,8 +102,8 @@ class TextEncoder(nn.Module):
         x_mask = torch.unsqueeze(commons.sequence_mask(x_lengths, x.size(2)), 1).to(x.dtype)
 
         x = self.prenet(x, x_mask)
-        if self.n_spks > 1:
-            x = torch.cat([x, g.unsqueeze(-1).repeat(1, 1, x.shape[-1])], dim=1)
+        #if self.n_spks > 1:
+        #    x = torch.cat([x, g.unsqueeze(-1).repeat(1, 1, x.shape[-1])], dim=1)
 
         x = self.encoder(x * x_mask, x_lengths, x_mask, g=g)
         stats = self.proj(x) * x_mask
@@ -194,11 +196,14 @@ class SynthesizerTrn(nn.Module):
         self.dec = Generator(vocoder_path=kwargs.get("vocoder_path", "UNIVERSAL_V1/g_02500000"))
 
         if dp_type == 'fmdp':
-            self.dp = duration_pred.FlowMatchingDurationPredictor(hidden_channels + (gin_channels if n_speakers > 1 else 0), 256, 3, 0.5, sigma_min=1e-4, n_steps=10, gin_channels=gin_channels)
+            self.dp = duration_pred.FlowMatchingDurationPredictor(hidden_channels,# + (gin_channels if n_speakers > 1 else 0),
+                                                                  256, 3, 0.5, sigma_min=1e-4, n_steps=10, gin_channels=gin_channels)
         elif dp_type == 'sdp':
-            self.dp = duration_pred.StochasticDurationPredictor(hidden_channels + (gin_channels if n_speakers > 1 else 0), 192, 3, 0.5, 4, gin_channels=gin_channels)
+            self.dp = duration_pred.StochasticDurationPredictor(hidden_channels,# + (gin_channels if n_speakers > 1 else 0),
+                                                                192, 3, 0.5, 4, gin_channels=gin_channels)
         else:
-            self.dp = duration_pred.DurationPredictor(hidden_channels + (gin_channels if n_speakers > 1 else 0), 256, 3, 0.5, gin_channels=gin_channels)
+            self.dp = duration_pred.DurationPredictor(hidden_channels,# + (gin_channels if n_speakers > 1 else 0),
+                                                      256, 3, 0.5, gin_channels=gin_channels)
 
         if n_speakers > 1:
             self.emb_g = nn.Embedding(n_speakers, gin_channels)
