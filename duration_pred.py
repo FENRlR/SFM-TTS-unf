@@ -57,7 +57,7 @@ class DurationPredictorNetworkWithTimeStep(nn.Module): # from Matcha, but with s
         #x = self.conv_2(x * x_mask)
         x1 = self.conv_2(x * x_mask)
         x1 = torch.relu(x1)
-        x1 = x1 + t
+        #x1 = x1 + t
         x1 = self.norm_2(x1)
         x1 = self.drop(x1)
         x = x + x1 #-!

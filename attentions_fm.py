@@ -225,6 +225,7 @@ class BasicTransformerBlock(nn.Module):
             obj: `bool`, *optional*, defaults to `False`): Configure if the attentions should contain a bias parameter.
     """
 
+    # TODO : CLEANUP
     def __init__(
             self,
             dim: int,
