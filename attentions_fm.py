@@ -10,6 +10,7 @@ from diffusers.models.attention import (
 )
 from diffusers.utils.torch_utils import maybe_allow_in_graph
 import flash as flp
+from text import symbols
 
 #from flash_attn import flash_attn_func
 #from flash_attn_custom import flash_attn_func
@@ -171,7 +172,7 @@ class FLB(nn.Module): # FLASH Block
             norm_klass = nn.LayerNorm
 
         #self.token_emb = nn.Embedding(num_tokens, dim)
-        #self.abs_pos_emb = flp.ScaledSinuEmbedding(dim)
+        self.abs_pos_emb = flp.ScaledSinuEmbedding(dim)
         self.group_size = group_size
 
         rotary_pos_emb = None #RotaryEmbedding(dim = min(32, query_key_dim))
@@ -191,7 +192,7 @@ class FLB(nn.Module): # FLASH Block
 
     def forward(self, x, mask=None):
         #x = self.token_emb(x)
-        #x = self.abs_pos_emb(x) + x
+        x = self.abs_pos_emb(x) + x
 
         fl_mask =(mask.squeeze(1)).bool()
 
@@ -224,6 +225,7 @@ class BasicTransformerBlock(nn.Module):
             obj: `bool`, *optional*, defaults to `False`): Configure if the attentions should contain a bias parameter.
     """
 
+    # TODO : CLEANUP
     def __init__(
             self,
             dim: int,
@@ -246,8 +248,19 @@ class BasicTransformerBlock(nn.Module):
         self.only_cross_attention = only_cross_attention
 
         #self.attn1 = TFB(dim, num_attention_heads)
-        #self.attn1 = FLB(dim, depth=num_blks)
-        self.attn1 = FLB(dim)
+        self.attn1 = FLB(
+            dim = dim,
+            depth = 1,
+            group_size = 256,
+            query_key_dim = 128,
+            expansion_factor = 2.,
+            causal = False,
+            attn_dropout = 0.,
+            norm_type = 'scalenorm',
+            shift_tokens = False,
+            laplace_attn_fn = False,
+            reduce_group_non_causal_attn = True
+        )
 
         self.norm2 = None
         self.attn2 = None

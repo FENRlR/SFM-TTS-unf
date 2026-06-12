@@ -342,21 +342,38 @@ class FLASH(nn.Module):
             causal_mask = torch.ones((g, g), dtype = torch.bool, device = device).triu(1)
             attn = attn.masked_fill(causal_mask, 0.)
 
-        quad_out = einsum('... i j, ... j d -> ... i d', attn, v)
+        #quad_out = einsum('... i j, ... j d -> ... i d', attn, v)
+        quad_out = torch.matmul(attn, v)
 
         # calculate linear attention output
         if self.causal:
-            lin_kv = einsum('b g n d, b g n e -> b g d e', lin_k, v) / g
+            #lin_kv = einsum('b g n d, b g n e -> b g d e', lin_k, v) / g
+            lin_kv = torch.matmul(lin_k.transpose(-1, -2), v) / g
 
             # exclusive cumulative sum along group dimension
             lin_kv = lin_kv.cumsum(dim = 1)
             lin_kv = F.pad(lin_kv, (0, 0, 0, 0, 1, -1), value = 0.)
 
-            lin_out = einsum('b g d e, b g n d -> b g n e', lin_kv, lin_q)
+            #lin_out = einsum('b g d e, b g n d -> b g n e', lin_kv, lin_q)
+            lin_out = torch.matmul(lin_kv.transpose(-1, -2), lin_q.transpose(-1, -2)).transpose(-1, -2)
+
         else:
+            """
             context_einsum_eq = 'b d e' if self.reduce_group_non_causal_attn else 'b g d e'
             lin_kv = einsum(f'b g n d, b g n e -> {context_einsum_eq}', lin_k, v) / n
             lin_out = einsum(f'b g n d, {context_einsum_eq} -> b g n e', lin_q, lin_kv)
+            """
+            if self.reduce_group_non_causal_attn is False:
+                lin_kv = torch.matmul(lin_k.transpose(-1, -2), v) / n
+                lin_out = torch.matmul(lin_q, lin_kv)
+            else:
+                B, G, N, D = lin_k.shape
+                E = v.shape[-1]
+                lin_k = lin_k.reshape(B, G * N, D)
+                v = v.reshape(B, G * N, E)
+                lin_kv = torch.matmul(lin_k.transpose(1, 2), v) / n
+                lin_out = torch.matmul(lin_q, lin_kv.unsqueeze(1))
+
 
         # fold back groups into full sequence, and excise out padding
         quad_attn_out, lin_attn_out = map(lambda t: rearrange(t, 'b g n d -> b (g n) d')[:, :n], (quad_out, lin_out))

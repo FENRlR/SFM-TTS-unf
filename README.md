@@ -4,7 +4,6 @@ Unofficial implementation of _**["SFM-TTS: Lightweight and Rapid Speech Synthesi
 
 ![Alt text](resources/fig1.png)
 
-Due to lack of details, the number of parameters is slightly larger than the one proposed in the paper. (Probably due to the conditioning part vs Matcha style speaker concatenation. Planning to fix this later)
 
 ## Pre-requisites
 1. Python >= 3.11
@@ -110,4 +109,14 @@ python train.py -c configs/SFM-VCTK.json -m models/test
 ```
 
 ## Credits
-WIP
+https://arxiv.org/abs/2410.12557v3
+
+https://github.com/shivammehta25/Matcha-TTS
+
+https://github.com/naver-ai/RapFlow-TTS
+
+https://github.com/k2-fsa/ZipVoice
+
+https://github.com/k2-fsa/icefall
+
+https://github.com/lucidrains/FLASH-pytorch
