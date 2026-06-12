@@ -248,8 +248,19 @@ class BasicTransformerBlock(nn.Module):
         self.only_cross_attention = only_cross_attention
 
         #self.attn1 = TFB(dim, num_attention_heads)
-        #self.attn1 = FLB(dim, depth=num_blks)
-        self.attn1 = FLB(dim)
+        self.attn1 = FLB(
+            dim = dim,
+            depth = 1,
+            group_size = 256,
+            query_key_dim = 128,
+            expansion_factor = 2.,
+            causal = False,
+            attn_dropout = 0.,
+            norm_type = 'scalenorm',
+            shift_tokens = False,
+            laplace_attn_fn = False,
+            reduce_group_non_causal_attn = True
+        )
 
         self.norm2 = None
         self.attn2 = None
