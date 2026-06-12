@@ -44,7 +44,7 @@
       "filter_channels": 768,
       "gin_channels": 64,
       "enc_pre": false,
-      "n_heads": 2,
+      "n_heads": 4,
       "n_layers": 6,
       "kernel_size": 3,
       "p_dropout": 0.1,
