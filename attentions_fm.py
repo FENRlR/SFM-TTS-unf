@@ -10,6 +10,7 @@ from diffusers.models.attention import (
 )
 from diffusers.utils.torch_utils import maybe_allow_in_graph
 import flash as flp
+from text import symbols
 
 #from flash_attn import flash_attn_func
 #from flash_attn_custom import flash_attn_func
@@ -171,7 +172,7 @@ class FLB(nn.Module): # FLASH Block
             norm_klass = nn.LayerNorm
 
         #self.token_emb = nn.Embedding(num_tokens, dim)
-        #self.abs_pos_emb = flp.ScaledSinuEmbedding(dim)
+        self.abs_pos_emb = flp.ScaledSinuEmbedding(dim)
         self.group_size = group_size
 
         rotary_pos_emb = None #RotaryEmbedding(dim = min(32, query_key_dim))
@@ -191,7 +192,7 @@ class FLB(nn.Module): # FLASH Block
 
     def forward(self, x, mask=None):
         #x = self.token_emb(x)
-        #x = self.abs_pos_emb(x) + x
+        x = self.abs_pos_emb(x) + x
 
         fl_mask =(mask.squeeze(1)).bool()
 
