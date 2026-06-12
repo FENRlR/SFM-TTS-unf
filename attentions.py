@@ -82,14 +82,21 @@ class RotaryPositionalEmbeddings(nn.Module):
         d_2 = self.d // 2
 
         # Calculate $[-x^{(\frac{d}{2} + 1)}, -x^{(\frac{d}{2} + 2)}, ..., -x^{(d)}, x^{(1)}, x^{(2)}, ..., x^{(\frac{d}{2})}]$
-        return torch.cat([-x[:, :, :, d_2:], x[:, :, :, :d_2]], dim=-1)
+        #return torch.cat([-x[:, :, :, d_2:], x[:, :, :, :d_2]], dim=-1)
+        return torch.cat([-x[..., d_2:], x[..., :d_2]], dim=-1)
 
     def forward(self, x: torch.Tensor):
         """
         * `x` is the Tensor at the head of a key or a query with shape `[b h t d]`
         """
         # Cache $\cos$ and $\sin$ values
-        x = rearrange(x, "b h t d -> t b h d")
+        #x = rearrange(x, "b h t d -> t b h d")
+
+        x3d = (x.ndim == 3)
+        if x3d:
+            x = rearrange(x, "b t d -> t b 1 d")
+        else:
+            x = rearrange(x, "b h t d -> t b h d")
 
         self._build_cache(x)
 
@@ -100,9 +107,14 @@ class RotaryPositionalEmbeddings(nn.Module):
         # $[-x^{(\frac{d}{2} + 1)}, -x^{(\frac{d}{2} + 2)}, ..., -x^{(d)}, x^{(1)}, x^{(2)}, ..., x^{(\frac{d}{2})}]$
         neg_half_x = self._neg_half(x_rope)
         x_rope = (x_rope * self.cos_cached[: x.shape[0]]) + (neg_half_x * self.sin_cached[: x.shape[0]])
+        torch.cat((x_rope, x_pass), dim=-1)
 
-        return rearrange(torch.cat((x_rope, x_pass), dim=-1), "t b h d -> b h t d")
+        if x3d:
+            return rearrange(x, "t b 1 d -> b t d")
+        else:
+            return rearrange(x, "t b h d -> b h t d")
 
+        #return rearrange(torch.cat((x_rope, x_pass), dim=-1), "t b h d -> b h t d")
 
 
 class Encoder(nn.Module):  # backward compatible vits2 encoder

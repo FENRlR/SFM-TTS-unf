@@ -309,7 +309,8 @@ class FLASH(nn.Module):
 
         # rotate queries and keys
         if exists(self.rotary_pos_emb):
-            quad_q, lin_q, quad_k, lin_k = map(self.rotary_pos_emb.rotate_queries_or_keys, (quad_q, lin_q, quad_k, lin_k))
+            #quad_q, lin_q, quad_k, lin_k = map(self.rotary_pos_emb.rotate_queries_or_keys, (quad_q, lin_q, quad_k, lin_k))
+            quad_q, lin_q, quad_k, lin_k = map(self.rotary_pos_emb, (quad_q, lin_q, quad_k, lin_k))
 
         # padding for groups
         padding = padding_to_multiple_of(n, g)
@@ -373,7 +374,6 @@ class FLASH(nn.Module):
                 v = v.reshape(B, G * N, E)
                 lin_kv = torch.matmul(lin_k.transpose(1, 2), v) / n
                 lin_out = torch.matmul(lin_q, lin_kv.unsqueeze(1))
-
 
         # fold back groups into full sequence, and excise out padding
         quad_attn_out, lin_attn_out = map(lambda t: rearrange(t, 'b g n d -> b (g n) d')[:, :n], (quad_out, lin_out))

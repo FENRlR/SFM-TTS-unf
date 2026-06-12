@@ -12,6 +12,8 @@ from diffusers.utils.torch_utils import maybe_allow_in_graph
 import flash as flp
 from text import symbols
 
+from attentions import RotaryPositionalEmbeddings
+
 #from flash_attn import flash_attn_func
 #from flash_attn_custom import flash_attn_func
 
@@ -175,7 +177,8 @@ class FLB(nn.Module): # FLASH Block
         self.abs_pos_emb = flp.ScaledSinuEmbedding(dim)
         self.group_size = group_size
 
-        rotary_pos_emb = None #RotaryEmbedding(dim = min(32, query_key_dim))
+        #rotary_pos_emb = None #RotaryEmbedding(dim = min(32, query_key_dim))
+        rotary_pos_emb = RotaryPositionalEmbeddings(min(32, query_key_dim))
         # max rotary embedding dimensions of 32, partial Rotary embeddings, from Wang et al - GPT-J
 
         self.layers = nn.ModuleList([flp.FLASH(dim = dim, group_size = group_size, query_key_dim = query_key_dim, expansion_factor = expansion_factor,
@@ -247,8 +250,7 @@ class BasicTransformerBlock(nn.Module):
         super().__init__()
         self.only_cross_attention = only_cross_attention
 
-        #self.attn1 = TFB(dim, num_attention_heads)
-        self.attn1 = FLB(
+        self.attn = FLB(
             dim = dim,
             depth = 1,
             group_size = 256,
@@ -262,18 +264,6 @@ class BasicTransformerBlock(nn.Module):
             reduce_group_non_causal_attn = True
         )
 
-        self.norm2 = None
-        self.attn2 = None
-
-        # let chunk size default to None
-        self._chunk_size = None
-        self._chunk_dim = 0
-
-    def set_chunk_feed_forward(self, chunk_size: Optional[int], dim: int):
-        # Sets chunk feed-forward
-        self._chunk_size = chunk_size
-        self._chunk_dim = dim
-
     def forward(
             self,
             hidden_states: torch.FloatTensor,  # -> "x" : [b t c]
@@ -285,14 +275,10 @@ class BasicTransformerBlock(nn.Module):
             class_labels: Optional[torch.LongTensor] = None,
     ):
 
-        cross_attention_kwargs = cross_attention_kwargs if cross_attention_kwargs is not None else {}
-
-        attn_output = self.attn1(
+        hidden_states = self.attn(
             #norm_hidden_states,
             hidden_states,
             mask=encoder_attention_mask if self.only_cross_attention else attention_mask,
         )
-
-        hidden_states = attn_output + hidden_states
 
         return hidden_states
