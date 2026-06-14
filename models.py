@@ -197,12 +197,15 @@ class SynthesizerTrn(nn.Module):
 
         if dp_type == 'fmdp':
             self.dp = duration_pred.FlowMatchingDurationPredictor(hidden_channels,# + (gin_channels if n_speakers > 1 else 0),
+            #self.dp = duration_pred.FlowMatchingDurationPredictor(hidden_channels + (gin_channels if n_speakers > 1 else 0),
                                                                   256, 3, 0.5, sigma_min=1e-4, n_steps=10, gin_channels=gin_channels)
         elif dp_type == 'sdp':
             self.dp = duration_pred.StochasticDurationPredictor(hidden_channels,# + (gin_channels if n_speakers > 1 else 0),
+            #self.dp = duration_pred.StochasticDurationPredictor(hidden_channels + (gin_channels if n_speakers > 1 else 0),
                                                                 192, 3, 0.5, 4, gin_channels=gin_channels)
         else:
             self.dp = duration_pred.DurationPredictor(hidden_channels,# + (gin_channels if n_speakers > 1 else 0),
+            #self.dp = duration_pred.DurationPredictor(hidden_channels + (gin_channels if n_speakers > 1 else 0),
                                                       256, 3, 0.5, gin_channels=gin_channels)
 
         if n_speakers > 1:

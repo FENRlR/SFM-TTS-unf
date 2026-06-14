@@ -179,6 +179,7 @@ class Decoder(nn.Module):
             act_fn="silu",
         )
 
+        """
         self.d_embeddings = SinusoidalPosEmb(in_channels)
         d_embed_dim = channels[0] * 4
         self.d_mlp = TimestepEmbedding(
@@ -186,6 +187,7 @@ class Decoder(nn.Module):
             time_embed_dim=d_embed_dim,
             act_fn="silu",
         )
+        """
 
         self.down_blocks = nn.ModuleList([])
         self.mid_blocks = nn.ModuleList([])
@@ -331,8 +333,10 @@ class Decoder(nn.Module):
         t = self.time_embeddings(t)
         t = self.time_mlp(t)
 
-        d = self.d_embeddings(d)
-        d = self.d_mlp(d)
+        #d = self.d_embeddings(d)
+        d = self.time_embeddings(d)
+        #d = self.d_mlp(d)
+        d = self.time_mlp(d)
 
         t = t + d
 
