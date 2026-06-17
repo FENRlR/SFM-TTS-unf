@@ -237,8 +237,8 @@ class DurationPredictor(nn.Module):
         self.norm_2 = modules.LayerNorm_legacy(filter_channels)
         self.proj = nn.Conv1d(filter_channels, 1, 1)
 
-        if gin_channels != 0:
-            self.cond = nn.Conv1d(gin_channels, in_channels, 1)
+        #if gin_channels != 0:
+        #    self.cond = nn.Conv1d(gin_channels, in_channels, 1)
 
     def forward(self, x, x_mask, g=None, **kwargs):
         x = torch.detach(x)

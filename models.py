@@ -196,16 +196,16 @@ class SynthesizerTrn(nn.Module):
         self.dec = Generator(vocoder_path=kwargs.get("vocoder_path", "UNIVERSAL_V1/g_02500000"))
 
         if dp_type == 'fmdp':
-            self.dp = duration_pred.FlowMatchingDurationPredictor(hidden_channels,# + (gin_channels if n_speakers > 1 else 0),
-            #self.dp = duration_pred.FlowMatchingDurationPredictor(hidden_channels + (gin_channels if n_speakers > 1 else 0),
+            #self.dp = duration_pred.FlowMatchingDurationPredictor(hidden_channels,# + (gin_channels if n_speakers > 1 else 0),
+            self.dp = duration_pred.FlowMatchingDurationPredictor(hidden_channels + (gin_channels if n_speakers > 1 else 0),
                                                                   256, 3, 0.5, sigma_min=1e-4, n_steps=10, gin_channels=gin_channels)
         elif dp_type == 'sdp':
-            self.dp = duration_pred.StochasticDurationPredictor(hidden_channels,# + (gin_channels if n_speakers > 1 else 0),
-            #self.dp = duration_pred.StochasticDurationPredictor(hidden_channels + (gin_channels if n_speakers > 1 else 0),
+            #self.dp = duration_pred.StochasticDurationPredictor(hidden_channels,# + (gin_channels if n_speakers > 1 else 0),
+            self.dp = duration_pred.StochasticDurationPredictor(hidden_channels + (gin_channels if n_speakers > 1 else 0),
                                                                 192, 3, 0.5, 4, gin_channels=gin_channels)
         else:
-            self.dp = duration_pred.DurationPredictor(hidden_channels,# + (gin_channels if n_speakers > 1 else 0),
-            #self.dp = duration_pred.DurationPredictor(hidden_channels + (gin_channels if n_speakers > 1 else 0),
+            #self.dp = duration_pred.DurationPredictor(hidden_channels,# + (gin_channels if n_speakers > 1 else 0),
+            self.dp = duration_pred.DurationPredictor(hidden_channels + (gin_channels if n_speakers > 1 else 0),
                                                       256, 3, 0.5, gin_channels=gin_channels)
 
         if n_speakers > 1:
@@ -265,6 +265,9 @@ class SynthesizerTrn(nn.Module):
         logw_ = torch.log(w + 1e-8) * x_mask
         # logw_ = torch.log(w + 1e-6) * x_mask
 
+        if g is not None:
+            x = torch.cat([x, g.unsqueeze(-1).repeat(1, 1, x.shape[-1])], dim=1)
+
         if self.dp_type == 'fmdp':
             logw = None
             l_length = None
@@ -298,6 +301,9 @@ class SynthesizerTrn(nn.Module):
             g = None
 
         mu_x, x, x_mask = self.enc_p(x, x_lengths, g=g)
+
+        if g is not None:
+            x = torch.cat([x, g.unsqueeze(-1).repeat(1, 1, x.shape[-1])], dim=1)
 
         """
         if self.dp_type == 'sdp':
