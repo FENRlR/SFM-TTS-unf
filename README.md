@@ -96,6 +96,14 @@ Unofficial implementation of _**["SFM-TTS: Lightweight and Rapid Speech Synthesi
     ```
     "model": {"monotonic_align": "ma"}
     ```
+    
+### Loss coefficients
+L<sub>total</sub> = λ<sub>1</sub> L<sub>dur</sub> + λ<sub>2</sub> L<sub>prior</sub> + λ<sub>3</sub> (L<sub>fm</sub> + L<sub>sc</sub>)
+
+The coefficients λ<sub>1</sub>, λ<sub>2</sub>, λ<sub>3</sub> were defined as 1.0 by default. 
+```
+"lambda_w": [1.0, 1.0, 1.0]
+```
 
 ## Training example
 ```sh 
