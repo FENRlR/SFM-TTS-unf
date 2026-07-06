@@ -200,7 +200,7 @@ def run(rank, n_gpus, hps):
         if hps.train.steps_from_filename is True:
             # utils.latest_checkpoint_path2(hps.model_dir, "G_*.pth")
             fname = os.path.basename(utils.latest_checkpoint_path(hps.model_dir, "G_*.pth"))  # ex) G_123_456.pth
-            global_step = fname.replace("G_", "").replace(".pth", "")
+            global_step = int(fname.replace("G_", "").replace(".pth", ""))
         else:
             global_step = (epoch_str-1) * len(train_loader)  # len(train_loader) -> 395
 
