@@ -116,6 +116,10 @@ python train.py -c configs/SFM-LJS.json -m models/test
 python train.py -c configs/SFM-VCTK.json -m models/test
 ```
 
+## Sample checkpoints
+- [VCTK](https://huggingface.co/FENRlR/SFM-TTS-unf/tree/main/VCTK-test)
+
+
 ## Credits
 https://arxiv.org/abs/2410.12557v3
 
