@@ -98,7 +98,8 @@ class RotaryPositionalEmbeddings(nn.Module):
         else:
             x = rearrange(x, "b h t d -> t b h d")
 
-        self._build_cache(x)
+        with torch.inference_mode(False):
+            self._build_cache(x)
 
         # Split the features, we can choose to apply rotary embeddings only to a partial set of features.
         x_rope, x_pass = x[..., : self.d], x[..., self.d :]
