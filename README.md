@@ -117,7 +117,7 @@ python train.py -c configs/SFM-VCTK.json -m models/test
 ```
 
 ## Sample checkpoints
-- [VCTK](https://huggingface.co/FENRlR/SFM-TTS-unf/tree/main/VCTK-test)
+- ~~[VCTK](https://huggingface.co/FENRlR/SFM-TTS-unf/tree/main/VCTK-test)~~(for branch 2026-07-27, planning to train it again)
 
 
 ## Credits
