@@ -136,13 +136,13 @@ class Encoder(nn.Module):  # backward compatible vits2 encoder
             query_head_dim=24,
             pos_head_dim=4,
             value_head_dim=12,
-            feedforward_dim=512,
+            feedforward_dim=filter_channels, #512,
             cnn_module_kernel=31,
             dropout=p_dropout,
         )
         self.enc_zf = zf.Zipformer2Encoder(
             encoder_layer,
-            4,
+            n_layers, #4,
             embed_dim=-1,
             time_embed_dim=-1,
             pos_dim=192,
