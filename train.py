@@ -210,6 +210,7 @@ def run(rank, n_gpus, hps):
             epoch_str = int(epoch_str)
             fname = os.path.basename(utils.latest_checkpoint_path(hps.model_dir, "G_*.pth"))
             global_step = fname.replace("G_", "").replace(".pth", "")
+            global_step = int(global_step)
         else:
             epoch_str = 1
             global_step = 0
